@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>Password Strength Analyzer</title>
+
+    <style>
+
+        body {
+
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+
+            background:
+                radial-gradient(circle at top left,
+                #1e293b,
+                #0f172a 45%,
+                #020617);
+
+            color: white;
+
+            display: flex;
+
+            justify-content: center;
+
+            align-items: center;
+
+            min-height: 100vh;
+
+            margin: 0;
+
+            padding: 20px;
+        }
+
+        .container {
+
+            width: 100%;
+
+            max-width: 460px;
+
+            padding: 40px;
+
+            border-radius: 28px;
+
+            background: rgba(255,255,255,0.08);
+
+            backdrop-filter: blur(18px);
+
+            border: 1px solid rgba(255,255,255,0.08);
+
+            box-shadow:
+                0 10px 40px rgba(0,0,0,0.45);
+
+        }
+
+        h2 {
+
+            text-align: center;
+
+            font-size: 42px;
+
+            margin-bottom: 12px;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    #ffffff,
+                    #f8d568
+                );
+
+            -webkit-background-clip: text;
+
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+
+            text-align: center;
+
+            color: rgba(255,255,255,0.75);
+
+            margin-bottom: 30px;
+
+            line-height: 1.6;
+        }
+
+        input[type="password"] {
+
+            width: 100%;
+
+            padding: 16px;
+
+            border-radius: 16px;
+
+            border: none;
+
+            background: rgba(255,255,255,0.08);
+
+            color: white;
+
+            font-size: 15px;
+
+            outline: none;
+
+            box-sizing: border-box;
+        }
+
+        input::placeholder {
+
+            color: rgba(255,255,255,0.5);
+        }
+
+        .toggle {
+
+            margin-top: 14px;
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 10px;
+        }
+
+        .toggle input {
+
+            width: auto;
+        }
+
+        button {
+
+            width: 100%;
+
+            padding: 16px;
+
+            margin-top: 24px;
+
+            border: none;
+
+            border-radius: 18px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    #f8d568,
+                    #d4af37
+                );
+
+            color: #111827;
+
+            font-size: 16px;
+
+            font-weight: bold;
+
+            cursor: pointer;
+
+            transition: 0.3s;
+        }
+
+        button:hover {
+
+            transform: translateY(-2px);
+
+            box-shadow:
+                0 10px 25px rgba(212,175,55,0.35);
+        }
+
+        .result {
+
+            margin-top: 30px;
+        }
+
+        .meter-bg {
+
+            width: 100%;
+
+            height: 14px;
+
+            border-radius: 999px;
+
+            background: rgba(255,255,255,0.08);
+
+            overflow: hidden;
+
+            margin-top: 10px;
+
+            margin-bottom: 20px;
+        }
+
+        .meter-fill {
+
+            height: 100%;
+
+            border-radius: 999px;
+        }
+
+        .weak {
+
+            width: 30%;
+
+            background: #ff4d4d;
+        }
+
+        .moderate {
+
+            width: 65%;
+
+            background: orange;
+        }
+
+        .strong {
+
+            width: 100%;
+
+            background: #22c55e;
+        }
+
+        .footer {
+
+            text-align: center;
+
+            margin-top: 30px;
+
+            color: rgba(255,255,255,0.45);
+
+            font-size: 13px;
+
+            line-height: 1.7;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h2>🔐 Password Strength Analyzer</h2>
+
+        <p class="subtitle">
+            Analyze password security using entropy,
+            pattern detection, and hashing techniques.
+        </p>
+
+        <form method="POST">
+
+            <input
+                type="password"
+                id="password"
+                name="password"
+                placeholder="Enter password"
+                required
+            >
+
+            <div class="toggle">
+
+                <input
+                    type="checkbox"
+                    onclick="togglePassword()"
+                >
+
+                <label>Show Password</label>
+
+            </div>
+
+            <button type="submit">
+                Analyze Password
+            </button>
+
+        </form>
+
+        {% if result %}
+
+        <div class="result">
+
+            {% if result == "Weak" %}
+
+                <h3 style="color:#ff4d4d;">
+                    Password Strength: {{ result }}
+                </h3>
+
+                <div class="meter-bg">
+                    <div class="meter-fill weak"></div>
+                </div>
+
+            {% elif result == "Moderate" %}
+
+                <h3 style="color:orange;">
+                    Password Strength: {{ result }}
+                </h3>
+
+                <div class="meter-bg">
+                    <div class="meter-fill moderate"></div>
+                </div>
+
+            {% elif result == "Strong" %}
+
+                <h3 style="color:#22c55e;">
+                    Password Strength: {{ result }}
+                </h3>
+
+                <div class="meter-bg">
+                    <div class="meter-fill strong"></div>
+                </div>
+
+            {% endif %}
+
+            <p>Entropy: {{ entropy }} bits</p>
+
+            {% if common %}
+
+                <p style="color:#ff8080;">
+                    ⚠ Common password detected!
+                </p>
+
+            {% endif %}
+
+            {% if pattern %}
+
+                <p style="color:#ffd166;">
+                    ⚠ Predictable pattern detected!
+                </p>
+
+            {% endif %}
+
+            <p>
+                Suggested Strong Password:
+                {{ suggestion }}
+            </p>
+
+        </div>
+
+        {% endif %}
+
+        <div class="footer">
+
+            Developed using Python, Flask,
+            bcrypt, HTML, CSS,
+            and cybersecurity concepts.
+
+        </div>
+
+    </div>
+
+    <script>
+
+        function togglePassword() {
+
+            var passwordField =
+                document.getElementById("password");
+
+            if (passwordField.type === "password") {
+
+                passwordField.type = "text";
+
+            } else {
+
+                passwordField.type = "password";
+            }
+        }
+
+    </script>
+
+</body>
+
+</html>
